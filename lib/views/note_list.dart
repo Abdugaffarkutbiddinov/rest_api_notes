@@ -1,7 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:rest_api_notes_project/models/note_for_listing.dart';
 
 class NoteList extends StatelessWidget {
-  const NoteList({Key? key}) : super(key: key);
+  NoteList({Key? key}) : super(key: key);
+  final notes = [
+    NoteForListing(
+        noteID: "1",
+        noteTitle: "Note 1",
+        createDateTime: DateTime.now(),
+        lastEditedDateTime: DateTime.now()),
+    NoteForListing(
+        noteID: "2",
+        noteTitle: "Note 2",
+        createDateTime: DateTime.now(),
+        lastEditedDateTime: DateTime.now()),
+    NoteForListing(
+        noteID: "3",
+        noteTitle: "Note 3",
+        createDateTime: DateTime.now(),
+        lastEditedDateTime: DateTime.now()),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -21,13 +39,13 @@ class NoteList extends StatelessWidget {
           itemBuilder: (_, index) {
             return ListTile(
               title: Text(
-                'Hello',
+                notes[index].noteTitle,
                 style: TextStyle(color: Theme.of(context).primaryColor),
               ),
-              subtitle: Text('Last edited on 21/2/2021'),
+              subtitle: Text('Last edited on ${notes[index].lastEditedDateTime}'),
             );
           },
-          itemCount: 30),
+          itemCount: notes.length),
     );
   }
 }
