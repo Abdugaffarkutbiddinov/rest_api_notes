@@ -100,7 +100,9 @@ class _NoteListState extends State<NoteList> {
                         Navigator.of(context).push(MaterialPageRoute(
                             builder: (_) => NoteModify(
                                   noteId: _apiResponse.data![index].noteID,
-                                )));
+                                ))).then((data) {
+                                  _fetchNotes();
+                        });
                       },
                     ),
                   );

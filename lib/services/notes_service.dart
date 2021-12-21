@@ -46,19 +46,37 @@ class NotesService {
     );
   }
 
-  Future<APIResponse<bool>> createNote(NoteInsert item) async {
+  Future<APIResponse<bool>> createNote(NoteManipulation item) async {
     print(item.toJson().runtimeType);
-    return http.post(Uri.parse(API + '/notes'), headers: headers, body: json.encode(item.toJson()))
+    return http
+        .post(Uri.parse(API + '/notes'),
+            headers: headers, body: json.encode(item.toJson()))
         .then((value) {
-          print(value.statusCode);
+      print(value.statusCode);
       if (value.statusCode == 201) {
-
         return APIResponse<bool>(data: true);
       }
       return APIResponse<bool>(
           error: true, errorMessage: 'An error has occurred');
     }).catchError(
-          (_) =>
+      (_) =>
+          APIResponse<bool>(error: true, errorMessage: 'An error has occurred'),
+    );
+  }
+
+  Future<APIResponse<bool>> updateNote(
+      String? noteId, NoteManipulation item) async {
+    return http
+        .put(Uri.parse(API + '/notes/' + noteId!),
+            headers: headers, body: json.encode(item.toJson()))
+        .then((value) {
+      if (value.statusCode == 204) {
+        return APIResponse<bool>(data: true);
+      }
+      return APIResponse<bool>(
+          error: true, errorMessage: 'An error has occurred');
+    }).catchError(
+      (_) =>
           APIResponse<bool>(error: true, errorMessage: 'An error has occurred'),
     );
   }

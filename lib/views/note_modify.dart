@@ -77,11 +77,42 @@ class _NoteModifyState extends State<NoteModify> {
                     child: ElevatedButton(
                       onPressed: () async {
                         if (isEditing) {
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          final note = NoteManipulation(
+                              noteTitle: _titleController.text,
+                              noteContent: _contentController.text);
+                          final result = await noteService.updateNote(widget.noteId, note);
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          final title = 'Done';
+                          final text = result.error
+                              ? result.errorMessage
+                              : "Your note is update";
+
+                          showDialog(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              title: Text(title),
+                              content: Text(text ?? 'An error occurred'),
+                              actions: [
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text("Ok"))
+                              ],
+                            ),
+                          ).then((data) {
+                            Navigator.of(context).pop();
+                          });
                         } else {
                           setState(() {
                             _isLoading = true;
                           });
-                          final note = NoteInsert(
+                          final note = NoteManipulation(
                               noteTitle: _titleController.text,
                               noteContent: _contentController.text);
                           final result = await noteService.createNote(note);
@@ -91,7 +122,7 @@ class _NoteModifyState extends State<NoteModify> {
                           final title = 'Done';
                           final text = result.error
                               ? result.errorMessage
-                              : "Your note created";
+                              : "Your note is created";
 
                           showDialog(
                             context: context,
