@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:rest_api_notes_project/models/note.dart';
+import 'package:rest_api_notes_project/models/note_insert.dart';
 import 'package:rest_api_notes_project/services/notes_service.dart';
 
 class NoteModify extends StatefulWidget {
@@ -26,20 +27,22 @@ class _NoteModifyState extends State<NoteModify> {
   @override
   void initState() {
     super.initState();
-    setState(() {
-      _isLoading = true;
-    });
-    noteService.getNote(widget.noteId).then((response) {
-      if (response.error) {
-        errorMessage = response.errorMessage ?? 'An error occurred';
-      }
-      note = response.data!;
-      _titleController.text = note.noteTitle;
-      _contentController.text = note.noteContent;
-    });
-    setState(() {
-      _isLoading = false;
-    });
+    if (isEditing) {
+      setState(() {
+        _isLoading = true;
+      });
+      noteService.getNote(widget.noteId).then((response) {
+        if (response.error) {
+          errorMessage = response.errorMessage ?? 'An error occurred';
+        }
+        note = response.data!;
+        _titleController.text = note.noteTitle;
+        _contentController.text = note.noteContent;
+      });
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -50,34 +53,69 @@ class _NoteModifyState extends State<NoteModify> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: _isLoading ? Center(child: CircularProgressIndicator()) : Column(
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: InputDecoration(hintText: 'Note title'),
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            TextField(
-              controller: _contentController,
-              decoration: InputDecoration(hintText: 'Note content'),
-            ),
-            SizedBox(
-              height: 16,
-            ),
-            SizedBox(
-              width: double.infinity,
-              height: 35,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('Submit'),
+        child: _isLoading
+            ? Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  TextField(
+                    controller: _titleController,
+                    decoration: InputDecoration(hintText: 'Note title'),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
+                  TextField(
+                    controller: _contentController,
+                    decoration: InputDecoration(hintText: 'Note content'),
+                  ),
+                  SizedBox(
+                    height: 16,
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 35,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        if (isEditing) {
+                        } else {
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          final note = NoteInsert(
+                              noteTitle: _titleController.text,
+                              noteContent: _contentController.text);
+                          final result = await noteService.createNote(note);
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          final title = 'Done';
+                          final text = result.error
+                              ? result.errorMessage
+                              : "Your note created";
+
+                          showDialog(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                              title: Text(title),
+                              content: Text(text ?? 'An error occurred'),
+                              actions: [
+                                ElevatedButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: Text("Ok"))
+                              ],
+                            ),
+                          ).then((data) {
+                            Navigator.of(context).pop();
+                          });
+                        }
+                      },
+                      child: Text('Submit'),
+                    ),
+                  )
+                ],
               ),
-            )
-          ],
-        ),
       ),
     );
   }
