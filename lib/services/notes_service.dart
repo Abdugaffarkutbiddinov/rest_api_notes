@@ -80,4 +80,22 @@ class NotesService {
           APIResponse<bool>(error: true, errorMessage: 'An error has occurred'),
     );
   }
+
+
+  Future<APIResponse<bool>> deleteNote(
+      String? noteId) async {
+    return http
+        .delete(Uri.parse(API + '/notes/' + noteId!),
+        headers: headers,)
+        .then((value) {
+      if (value.statusCode == 204) {
+        return APIResponse<bool>(data: true);
+      }
+      return APIResponse<bool>(
+          error: true, errorMessage: 'An error has occurred');
+    }).catchError(
+          (_) =>
+          APIResponse<bool>(error: true, errorMessage: 'An error has occurred'),
+    );
+  }
 }

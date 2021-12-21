@@ -46,8 +46,9 @@ class _NoteListState extends State<NoteList> {
         floatingActionButton: FloatingActionButton(
           onPressed: () {
             Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => NoteModify())).then((_) {
-                  _fetchNotes();
+                .push(MaterialPageRoute(builder: (_) => NoteModify()))
+                .then((_) {
+              _fetchNotes();
             });
           },
           child: const Icon(Icons.add),
@@ -75,7 +76,32 @@ class _NoteListState extends State<NoteList> {
                     confirmDismiss: (direction) async {
                       final result = await showDialog(
                           context: context, builder: (_) => NoteDelete());
-
+                      if (result) {
+                        final deleteResult = await service
+                            .deleteNote(_apiResponse.data![index].noteID);
+                        late var message;
+                        if (deleteResult.data == true) {
+                          message = "Note was successfully created";
+                        } else {
+                          message =
+                              deleteResult.errorMessage ?? 'An error occurred';
+                        }
+                        showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: Text('Done'),
+                            content: Text(message ?? 'An error occurred'),
+                            actions: [
+                              ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text("Ok"))
+                            ],
+                          ),
+                        );
+                        return deleteResult.data;
+                      }
                       return result;
                     },
                     background: Container(
@@ -97,11 +123,13 @@ class _NoteListState extends State<NoteList> {
                       subtitle: Text(
                           'Last edited on ${_formatDateTime(_apiResponse.data![index].latestEditDateTime)}'),
                       onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (_) => NoteModify(
-                                  noteId: _apiResponse.data![index].noteID,
-                                ))).then((data) {
-                                  _fetchNotes();
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(
+                                builder: (_) => NoteModify(
+                                      noteId: _apiResponse.data![index].noteID,
+                                    )))
+                            .then((data) {
+                          _fetchNotes();
                         });
                       },
                     ),
